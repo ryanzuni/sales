@@ -142,86 +142,60 @@ new class extends Component
 ?>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-10 space-y-10">
+<div class="min-h-screen bg-gray-100 p-8 space-y-8">
 
     {{-- HEADER --}}
     <div class="flex justify-between items-center">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">Sales Management</h1>
-            <p class="text-gray-500 text-sm">Daily Sales Transaction System</p>
-        </div>
-    </div>
-
-    <div class="bg-white p-6 rounded-2xl shadow">
-        <h3 class="text-lg font-bold mb-4">Revenue Chart</h3>
-        <canvas id="revenueChart"></canvas>
-    </div>
-
-    <script>
-    document.addEventListener('livewire:load', function () {
-
-        const ctx = document.getElementById('revenueChart');
-
-        const chartData = @json($this->chartData);
-
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: chartData.map(d => d.sale_date),
-                datasets: [{
-                    label: 'Revenue',
-                    data: chartData.map(d => d.total),
-                    borderWidth: 2,
-                    fill: false,
-                    tension: 0.3
-                }]
-            }
-        });
-
-    });
-    </script>
-
-    {{-- DASHBOARD CARDS --}}
-    <div class="grid grid-cols-2 gap-6">
-        <div class="bg-white p-6 rounded-2xl shadow-lg border-l-4 border-blue-500">
-            <p class="text-gray-500">Total Transaction</p>
-            <h2 class="text-3xl font-bold text-blue-600">
-                {{ $this->totalTransaction }}
-            </h2>
-        </div>
-
-        <div class="bg-white p-6 rounded-2xl shadow-lg border-l-4 border-green-500">
-            <p class="text-gray-500">Total Revenue</p>
-            <h2 class="text-3xl font-bold text-green-600">
-                Rp {{ number_format($this->totalRevenue) }}
-            </h2>
-        </div>
-    </div>
-
-    {{-- FILTER SECTION --}}
-    <div class="bg-white p-6 rounded-2xl shadow flex gap-4 items-end">
-        <div>
-            <label class="text-sm text-gray-500">Start Date</label>
-            <input type="date" wire:model.live="startDate"
-                class="border p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-400">
-        </div>
-
-        <div>
-            <label class="text-sm text-gray-500">End Date</label>
-            <input type="date" wire:model.live="endDate"
-                class="border p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-400">
+            <h1 class="text-3xl font-bold text-gray-800">Sales Dashboard</h1>
+            <p class="text-gray-500 text-sm">Monitor your daily transactions</p>
         </div>
 
         <button wire:click="create"
-            class="ml-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl shadow">
+            class="bg-gradient-to-r from-blue-600 to-blue-500 hover:scale-105 transition transform text-white px-6 py-3 rounded-xl shadow-lg">
             + Add Sale
         </button>
     </div>
 
+    {{-- STAT CARDS --}}
+    <div class="grid md:grid-cols-2 gap-6">
+
+        <div class="bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition">
+            <p class="text-gray-500 text-sm">Total Transactions</p>
+            <h2 class="text-4xl font-bold text-blue-600 mt-2">
+                {{ $this->totalTransaction }}
+            </h2>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition">
+            <p class="text-gray-500 text-sm">Total Revenue</p>
+            <h2 class="text-4xl font-bold text-green-600 mt-2">
+                Rp {{ number_format($this->totalRevenue) }}
+            </h2>
+        </div>
+
+    </div>
+
+    {{-- FILTER --}}
+    <div class="bg-white p-6 rounded-2xl shadow flex flex-wrap gap-4 items-end">
+        <div>
+            <label class="text-sm text-gray-500">Start Date</label>
+            <input type="date" wire:model="startDate"
+                class="border p-2 rounded-lg focus:ring-2 focus:ring-blue-400">
+        </div>
+
+        <div>
+            <label class="text-sm text-gray-500">End Date</label>
+            <input type="date" wire:model="endDate"
+                class="border p-2 rounded-lg focus:ring-2 focus:ring-blue-400">
+        </div>
+    </div>
+
     {{-- TABLE --}}
-    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+    <div class="bg-white rounded-2xl shadow overflow-hidden">
+
         <table class="w-full text-sm">
-            <thead class="bg-gray-100 text-gray-600">
+            <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                 <tr>
                     <th class="p-4 text-left">Date</th>
                     <th>Customer</th>
@@ -236,30 +210,46 @@ new class extends Component
             <tbody>
                 @foreach($this->sales as $sale)
                 <tr class="border-t hover:bg-gray-50 transition">
-                    <td class="p-4">{{ $sale->sale_date->format('d M Y') }}</td>
+
+                    <td class="p-4 font-medium">
+                        {{ $sale->sale_date->format('d M Y') }}
+                    </td>
+
                     <td>{{ $sale->customer_name }}</td>
+
                     <td>{{ $sale->product }}</td>
-                    <td>{{ $sale->qty }}</td>
+
+                    <td>
+                        <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs">
+                            {{ $sale->qty }}
+                        </span>
+                    </td>
+
                     <td>Rp {{ number_format($sale->price) }}</td>
-                    <td class="font-semibold text-green-600">
+
+                    <td class="font-bold text-green-600">
                         Rp {{ number_format($sale->qty * $sale->price) }}
                     </td>
+
                     <td class="text-center space-x-2">
+
                         <button wire:click="edit({{ $sale->id }})"
-                            class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg">
+                            class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg transition">
                             Edit
                         </button>
 
-                        <button
-                            onclick="if(confirm('Are you sure want to delete this transaction?')) { $wire.delete({{ $sale->id }}) }"
-                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg">
+                        <button wire:click="confirmDelete({{ $sale->id }})"
+                            onclick="return confirm('Delete this transaction?')"
+                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition">
                             Delete
                         </button>
+
                     </td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
+
         <div class="p-4">
             {{ $this->sales->links() }}
         </div>
@@ -267,48 +257,53 @@ new class extends Component
 
     {{-- MODAL --}}
     @if($isOpen)
-    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-        <div class="bg-white p-8 rounded-2xl w-96 shadow-2xl space-y-4">
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center">
 
-            <h2 class="text-xl font-bold text-gray-700">
-                {{ $sale_id ? 'Edit Transaction' : 'New Transaction' }}
+        <div class="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl space-y-4 animate-fadeIn">
+
+            <h2 class="text-xl font-bold">
+                {{ $sale_id ? 'Edit Sale' : 'New Sale' }}
             </h2>
 
             <input type="text" wire:model="customer_name"
                 placeholder="Customer Name"
-                class="border p-2 w-full rounded-lg">
+                class="border p-3 w-full rounded-xl">
 
             <input type="text" wire:model="product"
                 placeholder="Product Name"
-                class="border p-2 w-full rounded-lg">
+                class="border p-3 w-full rounded-xl">
 
-            <input type="number" wire:model.live="qty"
-                placeholder="Quantity"
-                class="border p-2 w-full rounded-lg">
+            <div class="grid grid-cols-2 gap-4">
+                <input type="number" wire:model="qty"
+                    placeholder="Qty"
+                    class="border p-3 rounded-xl">
 
-            <input type="number" wire:model.live="price"
-                placeholder="Price"
-                class="border p-2 w-full rounded-lg">
+                <input type="number" wire:model="price"
+                    placeholder="Price"
+                    class="border p-3 rounded-xl">
+            </div>
 
             <input type="date" wire:model="sale_date"
-                class="border p-2 w-full rounded-lg">
+                class="border p-3 w-full rounded-xl">
 
-            <div class="text-right font-bold text-lg text-green-600">
+            <div class="text-right text-lg font-bold text-green-600">
                 Total: Rp {{ number_format($this->liveTotal) }}
             </div>
 
-            <div class="flex justify-end gap-2">
+            <div class="flex justify-end gap-3 pt-4">
                 <button wire:click="$set('isOpen', false)"
-                    class="bg-gray-400 text-white px-4 py-2 rounded-lg">
+                    class="px-4 py-2 bg-gray-300 rounded-xl">
                     Cancel
                 </button>
 
                 <button wire:click="store"
-                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                    class="px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700">
                     Save
                 </button>
             </div>
+
         </div>
+
     </div>
     @endif
 
