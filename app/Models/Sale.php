@@ -20,7 +20,6 @@ class Sale extends Model
         'price' => 'decimal:2',
     ];
 
-    // 🔥 Interview killer improvement
     public function getGrandTotalAttribute()
     {
         return $this->qty * $this->price;
